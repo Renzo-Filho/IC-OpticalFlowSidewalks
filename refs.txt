@@ -1,0 +1,127 @@
+[1] P. P. Liang, A. Zadeh, and L.-P. Morency, “Foundations and recent trends in multi-
+modal machine learning: Principles, challenges, and open questions,” arXiv preprint
+arXiv:2209.03430, 2022.
+
+[2] M. Hosseini, F. Miranda, J. Lin, and C. T. Silva, “Citysurfaces: City-scale seman-
+tic segmentation of sidewalk materials,” Sustainable Cities and Society, vol. 79, p.
+103630, 2022.
+
+[3] R. J. P. Damaceno, L. Ferreira, F. Miranda, M. Hosseini, and R. M. Cesar Jr,
+“Sideseeing: A multimodal dataset and tools for sidewalk assessment,” in
+Proceedings of The 4th Annual Workshop on The Future of Urban Accessibility,
+2024. [Online]. Available: https://accessiblecities.github.io/UrbanAccess2024/
+
+[4] H. Morimitsu, X. Zhu, R. M. Cesar, X. Ji, and X.-C. Yin, “Dpflow: Adaptive optical
+flow estimation with a dual-pyramid framework,” in Proceedings of the Computer
+Vision and Pattern Recognition Conference, 2025, pp. 17 810–17 820.
+
+[5] ——, “Rapidflow: Recurrent adaptable pyramids with iterative decoding for effi-
+cient optical flow estimation,” in 2024 IEEE International Conference on Robotics
+and Automation (ICRA). IEEE, 2024, pp. 2946–2952.
+
+[6] J. Gehl, Cities for People. Washington, DC: Island Press, 2010.
+
+[7] B. K. P. Horn and B. G. Schunck, “Determining optical flow,” Artificial
+Intelligence, vol. 17, no. 1-3, pp. 185–203, 1981. [Online]. Available:
+https://doi.org/10.1016/0004-3702(81)90024-2
+
+[8] D. Fortun, P. Bouthemy, and C. Kervrann, “Optical flow modeling and computation:
+A survey,” Computer Vision and Image Understanding, vol. 134, pp. 1–21, May
+2015. [Online]. Available: https://doi.org/10.1016/j.cviu.2015.02.008
+
+[9] Y. Hu, Y. Zhang, Y. Song, Y. Deng, F. Yu, L. Zhang, W. Lin, D. Zou, and
+W. Yu, “Seeing through pixel motion: Learning obstacle avoidance from optical
+flow with one camera,” arXiv preprint arXiv:2411.04413, 2024, primary affiliation:
+Shanghai Jiao Tong University; Corresponding author: dpzou@sjtu.edu.cn.
+[Online]. Available: https://arxiv.org/html/2411.04413v1
+
+[10] Z. Zhang, H. Jiang, and H. Singh, “Neuflow: Real-time, high-accuracy optical flow
+estimation on robots using edge devices,” arXiv preprint arXiv:2403.10425, 2024,
+northeastern University, Boston. [Online]. Available: https://arxiv.org/html/2403.
+10425v1#bib.bib1
+
+[11] Y. LeCun, Y. Bengio, and G. Hinton, “Deep learning,” Nature, vol. 521, no.
+7553, pp. 436–444, May 2015, seminal review article on deep learning. [Online].
+Available: https://www.nature.com/articles/nature14539
+
+[12] A. Dosovitskiy, P. Fischer, E. Ilg, P. Hausser, C. Hazirbas, V. Golkov,
+P. van der Smagt, D. Cremers, and T. Brox, “Flownet: Learning optical
+flow with convolutional networks,” in Proceedings of the IEEE International
+Conference on Computer Vision (ICCV). IEEE, 2015, pp. 2758–2766. [Online].
+Available: https://www.cv-foundation.org/openaccess/content_iccv_2015/papers/
+Dosovitskiy_FlowNet_Learning_Optical_ICCV_2015_paper.pdf
+
+[13] E. Ilg, N. Mayer, T. Saikia, M. Keuper, A. Dosovitskiy, and T. Brox, “Flownet
+2.0: Evolution of optical flow estimation with deep networks,” in Proceedings
+of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR).
+IEEE, 2017, pp. 2462–2470, university of Freiburg and Intel Labs. [Online].
+Available: https://openaccess.thecvf.com/content_cvpr_2017/papers/Ilg_FlowNet_
+2.0_Evolution_CVPR_2017_paper.pdf
+
+[14] D. Sun, X. Yang, M.-Y. Liu, and J. Kautz, “Pwc-net: Cnns for optical flow using
+pyramid, warping, and cost volume,” in Proceedings of the IEEE Conference on
+Computer Vision and Pattern Recognition (CVPR). IEEE, 2018, pp. 8934–8943,
+8
+nVIDIA Corporation. [Online]. Available: https://openaccess.thecvf.com/content_
+cvpr_2018/papers/Sun_PWC-Net_CNNs_for_CVPR_2018_paper.pdf
+
+[15] Z. Teed and J. Deng, “Raft: Recurrent all-pairs field transforms for optical flow,”
+in Computer Vision – ECCV 2020: 16th European Conference on Computer
+Vision, ser. Lecture Notes in Computer Science, vol. 12347. Glasgow, UK
+(Virtual): Springer, 2020, pp. 402–419, princeton University. [Online]. Available:
+https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123470392.pdf
+
+[16] A. G. Howard, M. Zhu, B. Chen, D. Kalenichenko, W. Wang, T. Weyand,
+M. Andreetto, and H. Adam, “Mobilenets: Efficient convolutional neural
+networks for mobile vision applications,” arXiv preprint arXiv:1704.04861,
+2017, published version available in CVPR workshops. [Online]. Available:
+https://arxiv.org/pdf/1704.04861
+
+[17] A. Znobishchev, V. Filev, O. Kudashev, N. Orlov, and H. Shi, “Compactflownet:
+Efficient real-time optical flow estimation on mobile devices,” arXiv:2412.13273
+[cs.CV], December 2024. [Online]. Available: https://arxiv.org/abs/2412.13273
+
+[18] T.-W. Hui, X. Tang, and C. C. Loy, “Liteflownet: A lightweight convolutional neural
+network for optical flow estimation,” in Proceedings of the IEEE Conference on
+Computer Vision and Pattern Recognition (CVPR). IEEE, 2018, pp. 8981–8989,
+the Chinese University of Hong Kong and Nanyang Technological University.
+[Online]. Available: https://openaccess.thecvf.com/content_cvpr_2018/papers/Hui_
+LiteFlowNet_A_Lightweight_CVPR_2018_paper.pdf
+
+[19] L. Kong, C. Shen, and J. Yang, “Fastflownet: A lightweight network for fast optical
+flow estimation,” in 2021 IEEE International Conference on Robotics and Automa-
+tion (ICRA), 2021, pp. 10 310–10 316.
+
+[20] HALEVY, A.; NORVIG, P.; PEREIRA, F. The Unreasonable Effectiveness of Data. 
+IEEE Intelligent Systems, v. 24, n. 2, p. 8-12, mar./abr. 2009.
+
+[21] SHAH, S. T. H.; XUE, X. Traditional and modern strategies for optical flow: an investigation. 
+SN Applied Sciences, v. 3, 289, 2021.
+
+[22] FORSYTH, D. A.; PONCE, J. Computer Vision: A Modern Approach. Upper Saddle River: Pearson Prentice Hall, 2012.
+
+[23] GIBSON, J.; MARQUES, O. Optical Flow and Trajectory Estimation Methods. Cham: Springer, 2016.
+
+[24] SHAPIRO, L. G.; STOCKMAN, G. C. Computer Vision. Upper Saddle River: Prentice Hall, 2001.
+
+[25] SZELISKI, R. Computer Vision: Algorithms and Applications. London: Springer, 2011.
+
+[26] TORRALBA, A.; ISOLA, P.; FREEMAN, W. Foundations of Computer Vision. Cambridge: MIT Press, 2024.
+
+[27] SEA-RAFT: Simple, Efficient, Accurate RAFT for Optical Flow. ECCV 2024.
+
+[28] WAFT: Warping-Alone Field Transforms for Optical Flow. ICCV 2025. 
+
+[29] MemFlow: Optical Flow Estimation and Prediction with Memory. CVPR 2024.
+
+[30] PriOr-Flow: Enhancing Primitive Panoramic Optical Flow with Orthogonal View. ICCV 2025. 
+
+[31] Lightweight event-based optical flow estimation via iterative deblurring. ICRA 2024. 
+
+[32] AllTracker: Efficient Dense Point Tracking at High Resolution. ICCV 2025. 
+
+[33] Zero-Shot Monocular Scene Flow Estimation in the Wild. CVPR 2025. 
+
+[34]
+
+[35]
