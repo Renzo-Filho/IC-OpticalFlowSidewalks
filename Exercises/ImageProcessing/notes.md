@@ -31,9 +31,51 @@ O que é Gamma ($\gamma$)?: É um parâmetro que define a curvatura da transform
 Efeito: Se $\gamma > 1$, escurece os tons médios enquanto preserva pretos e brancos (aumenta contraste em tons escuros). Já $\gamma < 1$, clareia os tons médios enquanto preserva pretos e brancos (aumenta contraste em tons claros).
 
 Quando usar: Para corrigir percepção visual ou problemas de iluminação não-lineares.
+
+#### Ordem das Operações
+
+Contraste/Brilho → Gamma
+
+O Contraste/Brilho são lineares, trabalham no domínio da intensidade enquanto o Gamma é não-linear, trabalha no domínio perceptual. Se fizéssemos gamma primeiro a transformação linear posterior distorceria a curva gamma e os valores seriam re-escalados de forma inadequada, perdendo o controle preciso sobre a correção tonal.
+
+
     
 ## Color Balance
-Nosso exercício será ajustar a intensidade relativa das cores primárias. Iremos multiplicar cada canal por um fator que altera seu brilho.
+Esse procedimento ajusta a intensidade relativa das cores primárias. A operação é feita por canal (R, G, B). Podemos multiplicá-los por um fator que altera seu brilho ou ainda operar sobre transformações mais complexas, como o mapeamento no espaço de cores XYZ.
+
+###### Espaço de Cores XYZ
+
+É um espaço de cor matematicamente definido, usando coordenadas tridimensionais (X, Y, Z) para descrever todas as cores visíveis ao olho humano.
+
+    X: Representa aproximadamente a sensibilidade ao vermelho
+
+    Y: Representa o brilho luminoso (luminância)
+
+    Z: Representa aproximadamente a sensibilidade ao azul
+
+## Composição e Mascaramento (Compositing and Matting)
+
+Em muitos aplicativos de edição de fotos e de efeitos visuais, queremos inserir/combinar elementos em uma imagem. Esse processo é chamado de **composição** (Smith and Blinn 1996).
+
+Paralelo a isso, também é desejável extrair objetos de imagens, processo comumente chamado de **mascaramento**. Uma máscara define a área de uma imagem que deve ser mantida ou ignorada, permitindo que apenas certas partes da imagem sejam visíveis e sejam integradas com outros elementos (Porter and Duff 1984; Blinn 1994a).
+
+#### Alpha matting 
+
+> É um processo que visa estimar a translucidez de um objeto em uma determinada imagem. O "alpha matting" resultante descreve, em pixels, a quantidade de cores de primeiro e segundo plano que contribuem para a cor da imagem composta. [34]
+
+##### Alpha-Matted Color Image
+
+É uma imagem que além dos 3 canais de cor (RGB), possui um 4º canal intermediário(Alpha - $\alpha$) que representa:
+
+$\alpha$ = 1: Pixel totalmente opaco
+
+$\alpha$ = 0: Pixel totalmente transparente
+
+0 < $\alpha$ < 1: Pixel parcialmente transparente
+
+$$ C = (1-\alpha) B + \alpha F $$
 
 
-###### Renzo Real Machado Filho - 19/05/25.
+
+
+###### Renzo Real Machado Filho.

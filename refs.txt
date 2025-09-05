@@ -122,6 +122,8 @@ SN Applied Sciences, v. 3, 289, 2021.
 
 [33] Zero-Shot Monocular Scene Flow Estimation in the Wild. CVPR 2025. 
 
-[34]
+[34] T. Germer, T. Uelwer, S. Conrad and S. Harmeling, "Fast Multi-Level 
+Foreground Estimation," 2020 25th International Conference on Pattern 
+Recognition (ICPR), Milan, Italy, 2021, pp. 1104-1111, doi: 10.1109/ICPR48806.2021.9412408.
 
 [35]

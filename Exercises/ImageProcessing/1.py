@@ -58,7 +58,7 @@ def colorBalance(img, alpha):
     img_recombinada = cv2.merge([b, g, r]).astype(np.uint8)
     showIMG(img_recombinada)
 
-#colorBalance(img, 1.5)
+colorBalance(img, 1.1)
 
 
 
