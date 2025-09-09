@@ -10,6 +10,8 @@
 \usepackage{hyperref}
 \usepackage{subcaption} 
 \usepackage{float}
+\usepackage{amsmath} 
+\usepackage{amssymb}
 
 \onehalfspacing
 \setlength{\parindent}{1.5cm}
@@ -205,7 +207,51 @@ Dividindo por $\delta t$ e com $\delta t \to 0$, temos
 
 onde $(u, v)$ é o fluxo óptico.
 
+\subsubsection{Problema da Abertura}
 
+\subsection{O método de Lucas-Kanade}
+
+Vimos que, pelo resultado anterior, a equação de restrição de fluxo óptico é um problema mal posto. Assim, é necessário mais uma suposição. \\
+
+\textit{Suposição 3:} para cada pixel, assuma que o campo de movimento e o fluxo óptico são constantes em uma pequena vizinhança $W$.
+
+Para quaisquer $(l,k) \in W$, vale
+
+\[ I_x(l,k) u + I_y(l,k) v + I_t(l,k)  = 0 \]
+
+Isso resulta em um sistema de equações. Logo, na forma matricial para $W_{n\times n}$, temos
+
+\[
+\underbrace{
+\begin{bmatrix}
+I_x(1,1) & I_y(1,1) \\
+\vdots & \vdots \\
+I_x(n,n) & I_y(n,n)
+\end{bmatrix}
+}_{A}
+\underbrace{
+\begin{bmatrix}
+u \\
+v
+\end{bmatrix}
+}_{x}
+=
+\underbrace{
+\begin{bmatrix}
+I_t(1,1) \\
+\vdots \\
+I_t(n,n)
+\end{bmatrix}
+}_{B}
+\]
+
+Esse é um clássico problema do tipo $Ax=B$. Portanto, podemos resolvê-lo por mínimos quadrados, obtendo
+
+\[
+x = (A^T A)^{-1}A^TB.
+\]
+
+\subsubsection{Problemas}
 
 
 \section{Conclusões}
