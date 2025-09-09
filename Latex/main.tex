@@ -162,6 +162,48 @@ c(I) = \frac{1}{N}\sum_{i=0}^I h(i) = c(I-1) + \frac{1}{N}h(I),
 
 \noindent onde $I$ é o nível de intensidade atual (0-255 para imagens 8-bit), $h(I)$ é a frequência do nível de intensidade $I$ (valor do histograma) e $N$ é quantidade de pixels na imagem.
 
+\section{Fluxo Óptico}
+
+O fluxo óptico é definido como a distribuição das velocidades aparentes do movimento dos padrões de brilho em uma imagem. \cite{Horn1981}. 
+
+\subsection{Campo de Movimento (Motion Field)}
+
+Trata-se da velocidade de um ponto que se move na cena/imagem. Em muitos casos, esse conceito se confunde com o fluxo óptico. 
+
+\subsection{\textit{Optical Flow Constraint Equation}}
+
+Suponha que temos um ponto $(x,y)$ numa imagem que se moveu para $(x+\delta x, y+\delta y)$. O seu  deslocamento é $(\delta x, \delta y)$ e queremos medir esse movimento. Dizemos que o fluxo óptico é $(u, v) = (\frac{\delta x}{\delta t}, \frac{\delta y}{\delta t})$ num tempo $\delta t$, pequeno. \\
+
+\textit{Suposição 1:} O brilho de um ponto é constante ao longo do tempo. Então, 
+
+\[ I(x, y, t) = I(x+ \delta x, y + \delta y, t+\delta t).\]
+
+\textit{Suposição 2:} O deslocamento $(\delta x, \delta y)$ e o passo $\delta t$ são pequenos. \\
+
+Com isso, por Taylor, temos
+
+\[ f(x+\delta x) = f(x) + \frac{\partial f}{\partial x} \delta x + \dots + \frac{\partial^n f}{\partial x^n} \frac{\delta x^n}{n!}\]
+
+Se $\delta x \to \infty$, então $f(x + \delta x) = f(x) + \frac{\partial f}{\partial x} \delta x + O(\delta x^2)$.
+
+Para $\delta x, \delta y$ e $\delta t$ suficientemente pequenos, vale que
+
+\[ f(x + \delta x, y + \delta y, t + \delta t) \approx f(x, y, t) + \frac{\partial f}{\partial x} \delta x + \frac{\partial f}{\partial y} \delta y + \frac{\partial f}{\partial t} \delta t \]
+
+Pela \textit{suposição 2}, temos
+
+\[ I(x + \delta x, y + \delta y, t + \delta t) = I(x, y, t) + I_x \delta x + I_y \delta y + I_t \delta t\]
+
+Pela \textit{suposição 1} e subtraindo ambas as equações, obtemos
+
+\[ I_x \delta x + I_y \delta y + I_t \delta t = 0\]
+
+Dividindo por $\delta t$ e com $\delta t \to 0$, temos
+
+\[ I_x \frac{\delta x}{\delta t} + I_y \frac{\delta y}{\delta t} + I_t  = 0\]
+\[ \Leftrightarrow I_x u + I_y v + I_t  = 0, \]
+
+onde $(u, v)$ é o fluxo óptico.
 
 
 
