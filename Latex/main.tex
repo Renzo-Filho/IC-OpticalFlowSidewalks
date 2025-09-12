@@ -251,8 +251,33 @@ Esse é um clássico problema do tipo $Ax=B$. Portanto, podemos resolvê-lo por 
 x = (A^T A)^{-1}A^TB.
 \]
 
-\subsubsection{Problemas}
+\subsubsection{Condições}
 
+\begin{itemize}
+    \item $A^TA$ deve ser inversível
+    \item $A^TA$ deve estar bem condicionada:
+    \begin{itemize}
+        \item Sejam $\lambda_1, \lambda_2$ os autovalores de $A^TA$. Então, $|\frac{\lambda_1}{\lambda_2}| \approx 1$ e $\lambda_1, \lambda_2 > \epsilon$.
+    \end{itemize}
+\end{itemize}
+
+As seguintes situações descrevem situações comuns: \\
+
+\textbf{Regiões Homogêneas}
+
+Regiões sem muita textura dificultam a visualização de movimento. Matematicamente, $\lambda_1 \approx \lambda_2$, mas ambos são pequenos. \\
+
+\textbf{Bordas}
+
+Regiões com presença de bordas geram um problema mal condicionado. Os gradientes estão predominantemente em um direção, i.e, a variação significativa está em uma única direção. Assim, o resultado da estimação de fluxo óptico pode ser ambíguo. Matematicamente, $\lambda_1 >>> \lambda_2$. \\
+
+\textbf{Regiões Texturizadas}
+
+Nesse cenário, a estimativa é muito boa. Há muitas variações nos padrões de brilho. Matematicamente, $\lambda_1 \approx \lambda_2$ e $\lambda_1, \lambda_2 > \epsilon$.
+
+\subsection{Coarse-To-Fine Flow Estimation (Estimação de Fluxo do "Grosso ao Fino") }
+
+Quando temos uma sequência de imagens com grandes movimentos, a aproximação por série de Taylor não é mais válida, bem como suas suposições.
 
 \section{Conclusões}
 
