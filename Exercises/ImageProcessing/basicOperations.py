@@ -1,7 +1,6 @@
 import cv2, random
 import numpy as np
 
-
 img = cv2.imread('Images/a.jpg')
 height, width, canais = img.shape
 
