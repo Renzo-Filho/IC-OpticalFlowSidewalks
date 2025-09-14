@@ -7,7 +7,6 @@ output_dir = 'Dataset/videoFrames'
 
 def convertToFrames(video_path, output_dir):
     
-    # Passo 1: Verificar e criar o diretório de saída, se necessário.
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         print("Diretório criado com sucesso.")
@@ -51,16 +50,16 @@ def convertToFrames(video_path, output_dir):
 imagem e exibi-la na tela, para que possamos ver se a detecção fez sentido. 
 """
 
-def prepFrames(frame1_path, frame2_path):
-    """ Carregará duas imagens consecutivas do nosso diretório Dataset/videoFrames e converterá ambas para escala de cinza. """
+def LKmethod(frame1_path, frame2_path):
+    """ Carregará duas imagens consecutivas do nosso diretório Dataset/videoFrames e converterá ambas para escala de cinza. 
+    Depois, usamos a função cv2.goodFeaturesToTrack() no primeiro frame para encontrar uma lista de cantos promissores. 
+    Por fim, calculamos o fluxo óptico. """
 
     frame1 = cv2.imread(frame1_path)
     frame2 = cv2.imread(frame2_path)
 
     frame1_grayscale = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
     frame2_grayscale = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
-
-
 
     # Parâmetros para o detector de cantos Shi-Tomasi
     feature_params = dict(maxCorners = 100, qualityLevel = 0.3, minDistance = 7, blockSize = 7)
@@ -127,10 +126,20 @@ def prepFrames(frame1_path, frame2_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
-
-
+"""
 f1 = "Dataset/videoFrames/frame_0080.png"
 f2 = "Dataset/videoFrames/frame_0081.png"
 
-prepFrames(f1, f2)
+LKmethod(f1, f2) """
+
+dir = 'Dataset/cars6'
+D = []
+
+with os.scandir(dir) as images:
+    for img in images:
+        D.append(img.path)
+
+D.sort()
+
+for i in range(len(D)-1):
+    LKmethod(D[i], D[i+1])
