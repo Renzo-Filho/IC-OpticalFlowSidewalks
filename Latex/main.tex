@@ -279,8 +279,57 @@ Nesse cenário, a estimativa é muito boa. Há muitas variações nos padrões d
 
 Quando temos uma sequência de imagens com grandes movimentos, a aproximação por série de Taylor não é mais válida, bem como suas suposições.
 
-\section{Conclusões}
 
+\section{State-of-Art}
+
+A estimação de movimento nas cenas pode ser dividido em três métodos: knowledge-driven, data-driven e hybrid-driven. 
+
+\subsection{knowledge-driven}
+
+É baseado em suposições para restringir o processo de estimação e modelar a correspondência espacial-temporal. Os primeiros métodos são Horn e Schunck (HS) e Lucas e Kanade (LK). 
+
+\subsection{Desafios}
+
+\subsubsection{Grandes Deslocamentos}
+
+Objetos que se movem em rapidamente producem grandes distâncias entre os pixels nas cenas, o que dificulta o cálculo. Para lidar com esse problema, é usual utilizar uma estratégia "fino ao grosso" (coarse-to-fine).
+
+\subsubsection{Oclusão}
+
+A oclusão é o processo de detectar e/ou rastrear objetos quando estão ocultos ou obstruídos numa cena. Os métodos mais comuns adotam um esquema de verificação de consistência.
+
+\subsubsection{Variações de Iluminação}
+
+A clássica suposição de constância do brilho não se aplica em contextos de mudanças de iluminação. ???
+
+\subsubsection{Ruído}
+
+Filtros são aplicados em um campo para reduzir o ruído e melhorar a qualidade do mapeamento do fluxo.
+
+\subsection{Data-driven}
+
+As técnicas mais dominantes utilizam o deep learning. As CNNs tem sido muito bem sucedidas para a estimação de fluxo óptico. Por sua vez, esses métodos se divivem em U-Net e em Rede de Pirâmide Espacial.
+
+\subsubsection{U-Net}
+
+Utiliza a estrutura de encoder-decoder. Por causa da contração e expansão do mapeamento de features nos encoders e decoders, há perda de detalhes importantes, o que é prejudicial para a estimação densa de movimento e atrapalha a acurácia e o detalhamento do campo de fluxo.
+
+\section{Escala de Cinza}
+O Cálculo da Escala de Cinza
+
+Seu raciocínio de usar a média (R+G+B)/3 é perfeitamente lógico e seria a forma mais simples de fazer a conversão. No entanto, o método padrão é um pouco mais complexo, e o motivo é fascinante: a biologia do olho humano!
+
+Nossos olhos não são igualmente sensíveis a todas as cores. Somos muito mais sensíveis à luz verde, um pouco menos à vermelha e bem menos à azul.
+
+Para criar uma representação em escala de cinza que pareça "natural" para um ser humano em termos de brilho percebido, a conversão usa uma média ponderada. Os canais de cor que percebemos melhor têm um peso maior no cálculo final.
+
+A fórmula padrão (usada pelo OpenCV e em muitas outras aplicações) é:
+
+Y=0.299⋅R+0.587⋅G+0.114⋅B
+
+Onde Y é o valor do pixel de luminância (o valor de cinza).
+
+Veja como o Verde (G) tem um peso enorme (quase $60\%$), enquanto o Azul (B) tem um peso bem pequeno. Isso garante que uma imagem com muito verde pareça mais clara em escala de cinza do que uma imagem com muito azul, o que corresponde à nossa percepção.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
