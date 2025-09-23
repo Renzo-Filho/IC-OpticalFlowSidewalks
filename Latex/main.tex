@@ -288,31 +288,84 @@ A estimação de movimento nas cenas pode ser dividido em três métodos: knowle
 
 É baseado em suposições para restringir o processo de estimação e modelar a correspondência espacial-temporal. Os primeiros métodos são Horn e Schunck (HS) e Lucas e Kanade (LK). 
 
-\subsection{Desafios}
+\subsubsection{Desafios}
 
-\subsubsection{Grandes Deslocamentos}
+\textbf{Grandes Deslocamentos}
 
 Objetos que se movem em rapidamente producem grandes distâncias entre os pixels nas cenas, o que dificulta o cálculo. Para lidar com esse problema, é usual utilizar uma estratégia "fino ao grosso" (coarse-to-fine).
 
-\subsubsection{Oclusão}
+\textbf{Oclusão}
 
 A oclusão é o processo de detectar e/ou rastrear objetos quando estão ocultos ou obstruídos numa cena. Os métodos mais comuns adotam um esquema de verificação de consistência.
 
-\subsubsection{Variações de Iluminação}
+\textbf{Variações de Iluminação}
 
 A clássica suposição de constância do brilho não se aplica em contextos de mudanças de iluminação. ???
 
-\subsubsection{Ruído}
+\textbf{Ruído}
 
 Filtros são aplicados em um campo para reduzir o ruído e melhorar a qualidade do mapeamento do fluxo.
 
 \subsection{Data-driven}
 
-As técnicas mais dominantes utilizam o deep learning. As CNNs tem sido muito bem sucedidas para a estimação de fluxo óptico. Por sua vez, esses métodos se divivem em U-Net e em Rede de Pirâmide Espacial.
+As técnicas mais dominantes utilizam o deep learning. As CNNs tem sido muito bem sucedidas para a estimação de fluxo óptico. Por sua vez, esses métodos se dividem em U-Net e em Rede de Pirâmide Espacial.
+
+Comumente, os métodos data-driven usam um ground truth como um sinal supervisionado, o que depende de dados rotulados. Entretanto, coletar um ground truth denso a nivel de pixel para cenas reais é um processo complicado e longo.
 
 \subsubsection{U-Net}
 
 Utiliza a estrutura de encoder-decoder. Por causa da contração e expansão do mapeamento de features nos encoders e decoders, há perda de detalhes importantes, o que é prejudicial para a estimação densa de movimento e atrapalha a acurácia e o detalhamento do campo de fluxo.
+
+\subsubsection{Rede de Pirâmide Espacial}
+
+O SPyNet foi a primeira arquitetura a utilizar essa técnica, cuja principal vantagem é o tamanho reduzido do modelo. Entretanto, sua acurácia ainda não pe capaz de bater o FlowNet2.0. O SPyNet estima grandes movimentos na camada mais grossa e deforma a segunda imagem em direção ao primeiro usando o fluxo amostrado de um nível anterior.
+
+Esse mecanismo tem a característica de ser muito "personalizável" para a estimação de fluxo óptico. Sua construção detém diversos princípios da área, como a pirâmede espacial, deformação (warping) e pós-processamento. Isso é capaz de aumentar muito a eficiência e a acurácia da técnica.
+
+\subsection{Hybrid driven}
+
+Tais métodos usam suposições téoricas e, também, dados não-rotulados para o treino.
+
+\subsubsection{U-Net e Rede de Pirâmide Espacial}
+
+Para contornar o problema dos dados, vários trabalhos tentam aprender de maneira não supervisionada baseando-se em suposições teóricas. Outros tentam trabalhar de forma semi-supervisionada. Todavia, ainda não foram capazes de obter acurácias melhores nos mesmos datasets públicos.
+
+\subsection{Métricas}
+
+\subsubsection{End-to-End Point Error (EPE) and Average Endpoint Error (AEE)}
+
+O erro de ponto final (EPE) para um determinado pixel ou ponto é calculado como a distância euclidiana entre o vetor de fluxo óptico estimado e o vetor de fluxo óptico da verdade básica naquele local.
+
+O erro médio do ponto final (AEE), que calcula a distância euclidiana entre o campo de fluxo calculado e o campo de fluxo da verdade básica. Com isso, é nada mais que a média entre todos os pontos/pixels do cálculo anterior.
+
+\[ \frac{1}{HW} \sum \underbrace{\sqrt{(u_* - u)^2 + (v_* - v)^2}}_{EPE}\hspace{0.2cm}, \]
+
+onde $HW$ é número total de pixels na imagem, $(u_*, v_*)$ o ground truth e $(u,v)$ a estimativa do fluxo óptico.
+
+\subsubsection{Average Angular Error (AAE)}
+
+Para cada pixel, o erro angular é o ângulo entre o vetor de fluxo estimado e o vetor de fluxo do ground truth. Isso mede a precisão direcional do movimento estimado.
+
+O AAE é a média desses erros angulares individuais em todos os pixels da imagem ou em uma região específica de interesse. Ele fornece um único valor que indica a precisão direcional geral do algoritmo de fluxo óptico.
+
+\[ \frac{1}{HW} \sum \arccos \Bigg( \frac{u_*u + v_*v + 1}{\sqrt{(u_*^2 + v_*^2 +1)(u^2 + v^2 + 1)}}\Bigg) \]
+
+\subsubsection{Root-Mean-Square Error (RMSE)}
+
+Quantifica a precisão da estimativa de movimento. O valor do RMSE é expresso em pixels por quadro (px/frame). Se o RMSE for 1.5, significa que, em média, a ponta do vetor estimado está errada por 1.5 pixels em relação à ponta do vetor correto.
+
+Quanto menor, melhor. Um RMSE baixo indica que os vetores estimados estão muito próximos dos vetores reais. Isso significa que o algoritmo é preciso. Quanto maior, pior. Um RMSE alto indica que há uma grande discrepância entre o movimento estimado e o movimento real. O algoritmo tem baixa precisão.
+
+\[ \sqrt{1/HW \sum_{(x,y)} (I_{\text{warped}} (x,y) - I(x,y))^2 } \hspace{0.2cm} ,\]
+
+onde $I(x, y)$ é a intensidade do pixel na posição $(x, y)$ do segundo quadro (o quadro para o qual estamos tentando prever o movimento) e $I_{\text{warped}}(x, y)$ é a intensidade do pixel na posição (x, y) da imagem warpeada.
+
+\textbf{Limitações:}
+Média pode esconder detalhes: Um RMSE baixo pode ser causado por uma performance excelente em 90\% da imagem, mas um desempenho terrível em 10\% (e.g., em regiões de oclusão). A média pode mascarar esses erros localizados.
+
+Não captura erros de direção: O RMSE mede principalmente a magnitude do erro. Dois vetores que apontam para direções completamente opostas, mas com magnitudes similares, podem ter um erro de magnitude pequeno, embora o erro de direção seja catastrófico.
+
+Depende do Ground Truth: A métrica só é válida se você tiver um ground truth confiável.
 
 \section{Escala de Cinza}
 O Cálculo da Escala de Cinza
@@ -325,7 +378,7 @@ Para criar uma representação em escala de cinza que pareça "natural" para um 
 
 A fórmula padrão (usada pelo OpenCV e em muitas outras aplicações) é:
 
-Y=0.299⋅R+0.587⋅G+0.114⋅B
+$Y=0.299⋅R+0.587⋅G+0.114⋅B$
 
 Onde Y é o valor do pixel de luminância (o valor de cinza).
 
