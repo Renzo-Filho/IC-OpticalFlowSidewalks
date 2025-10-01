@@ -164,6 +164,24 @@ c(I) = \frac{1}{N}\sum_{i=0}^I h(i) = c(I-1) + \frac{1}{N}h(I),
 
 \noindent onde $I$ é o nível de intensidade atual (0-255 para imagens 8-bit), $h(I)$ é a frequência do nível de intensidade $I$ (valor do histograma) e $N$ é quantidade de pixels na imagem.
 
+\section{Escala de Cinza}
+O Cálculo da Escala de Cinza
+
+Seu raciocínio de usar a média (R+G+B)/3 é perfeitamente lógico e seria a forma mais simples de fazer a conversão. No entanto, o método padrão é um pouco mais complexo, e o motivo é fascinante: a biologia do olho humano!
+
+Nossos olhos não são igualmente sensíveis a todas as cores. Somos muito mais sensíveis à luz verde, um pouco menos à vermelha e bem menos à azul.
+
+Para criar uma representação em escala de cinza que pareça "natural" para um ser humano em termos de brilho percebido, a conversão usa uma média ponderada. Os canais de cor que percebemos melhor têm um peso maior no cálculo final.
+
+A fórmula padrão (usada pelo OpenCV e em muitas outras aplicações) é:
+
+$Y=0.299R + 0.587G + 0.114B$
+
+Onde Y é o valor do pixel de luminância (o valor de cinza).
+
+Veja como o Verde (G) tem um peso enorme (quase $60\%$), enquanto o Azul (B) tem um peso bem pequeno. Isso garante que uma imagem com muito verde pareça mais clara em escala de cinza do que uma imagem com muito azul, o que corresponde à nossa percepção.
+
+
 \section{Fluxo Óptico}
 
 O fluxo óptico é definido como a distribuição das velocidades aparentes do movimento dos padrões de brilho em uma imagem. \cite{Horn1981}. 
@@ -360,29 +378,71 @@ Quanto menor, melhor. Um RMSE baixo indica que os vetores estimados estão muito
 
 onde $I(x, y)$ é a intensidade do pixel na posição $(x, y)$ do segundo quadro (o quadro para o qual estamos tentando prever o movimento) e $I_{\text{warped}}(x, y)$ é a intensidade do pixel na posição (x, y) da imagem warpeada.
 
-\textbf{Limitações:}
-Média pode esconder detalhes: Um RMSE baixo pode ser causado por uma performance excelente em 90\% da imagem, mas um desempenho terrível em 10\% (e.g., em regiões de oclusão). A média pode mascarar esses erros localizados.
+\textbf{Limitações:} Um RMSE baixo pode ser causado por uma performance excelente em 90\% da imagem, mas um desempenho terrível em 10\% (e.g., em regiões de oclusão). A média pode mascarar esses erros localizados.
 
-Não captura erros de direção: O RMSE mede principalmente a magnitude do erro. Dois vetores que apontam para direções completamente opostas, mas com magnitudes similares, podem ter um erro de magnitude pequeno, embora o erro de direção seja catastrófico.
+O RMSE mede principalmente a magnitude do erro. Dois vetores que apontam para direções completamente opostas, mas com magnitudes similares, podem ter um erro de magnitude pequeno, embora o erro de direção seja catastrófico. Por fim, a métrica só é válida se você tiver um ground truth confiável.
 
-Depende do Ground Truth: A métrica só é válida se você tiver um ground truth confiável.
+\subsubsection{Outliers ou Pontos Ruins}
 
-\section{Escala de Cinza}
-O Cálculo da Escala de Cinza
+Embora a média do EPE (AEE) seja uma métrica útil, ela pode ser distorcida por erros muito grandes em poucas regiões da imagem. Para contornar isso, define-se o conceito de \textbf{outlier}, que é uma predição considerada um erro grave. Em benchmarks de referência, como o KITTI, um pixel é classificado como outlier se o seu erro satisfizer a seguinte condição:
 
-Seu raciocínio de usar a média (R+G+B)/3 é perfeitamente lógico e seria a forma mais simples de fazer a conversão. No entanto, o método padrão é um pouco mais complexo, e o motivo é fascinante: a biologia do olho humano!
+\[ \text{EPE} > 3 \text{ pixels} \quad \text{E} \quad \text{EPE} > 0.05 \cdot || {v}_{\text{gt}}|| \]
 
-Nossos olhos não são igualmente sensíveis a todas as cores. Somos muito mais sensíveis à luz verde, um pouco menos à vermelha e bem menos à azul.
+Esta condição dupla estabelece um limiar de erro absoluto (3 pixels) e um limiar de erro relativo (5\% da magnitude do vetor ground truth), tornando a avaliação mais robusta para diferentes magnitudes de movimento.
 
-Para criar uma representação em escala de cinza que pareça "natural" para um ser humano em termos de brilho percebido, a conversão usa uma média ponderada. Os canais de cor que percebemos melhor têm um peso maior no cálculo final.
+\subsubsection{Fl-all}
 
-A fórmula padrão (usada pelo OpenCV e em muitas outras aplicações) é:
+A métrica F1-all (Flow outliers averaged over all pixels) indica a porcentagem de "pontos ruins" (outliers), onde um "ponto ruim" satisfaz as equações na seção anterior. Assim, temos
 
-$Y=0.299⋅R+0.587⋅G+0.114⋅B$
+\[ Fl-all = \frac{N}{HW} \times 100\%\]
 
-Onde Y é o valor do pixel de luminância (o valor de cinza).
+\subsection{Datasets}
 
-Veja como o Verde (G) tem um peso enorme (quase $60\%$), enquanto o Azul (B) tem um peso bem pequeno. Isso garante que uma imagem com muito verde pareça mais clara em escala de cinza do que uma imagem com muito azul, o que corresponde à nossa percepção.
+\subsubsection{MPI Sintel}
+Derivado da animação de código aberto "Sintel", este é um dataset sintético desafiador que inclui cenas complexas e fotorrealistas. É um dos benchmarks mais importantes para avaliação de algoritmos de fluxo óptico.
+\begin{itemize}
+    \item \textbf{Conteúdo:} Cenas com movimentos amplos, desfoque de movimento (\textit{motion blur}), oclusões, superfícies não lambertianas (reflexos) e efeitos atmosféricos (névoa, fumaça).
+    \item \textbf{Ground Truth:} Fornece fluxo óptico denso e preciso.
+    \item \textbf{Versões:} Possui duas versões para avaliação: \textbf{Clean}, que contém as cenas com renderização padrão, e \textbf{Final}, que adiciona desfoque de movimento e efeitos atmosféricos, tornando a estimação mais difícil.
+    \item \textbf{Uso Principal:} Avaliação (benchmark) de algoritmos em condições complexas e variadas.
+\end{itemize}
+
+\subsubsection{KITTI}
+O dataset KITTI é composto por sequências de vídeo do mundo real, capturadas a partir de um carro em movimento em ambientes urbanos e rodoviários. É o benchmark padrão para tarefas de visão computacional relacionadas à condução autônoma.
+\begin{itemize}
+    \item \textbf{Conteúdo:} Cenas de rua, com carros, pedestres e edifícios. Inclui dados de múltiplos sensores, como câmeras estéreo, Lidar e GPS/IMU.
+    \item \textbf{Ground Truth:} O fluxo óptico é \textbf{esparso}, gerado a partir da projeção de dados 3D do Lidar nas imagens. Apenas pixels com correspondência 3D confiável possuem ground truth.
+    \item \textbf{Versões:} Os benchmarks de fluxo óptico mais comuns são o KITTI 2012 e o KITTI 2015.
+    \item \textbf{Uso Principal:} Avaliação de algoritmos em cenários de condução autônoma do mundo real.
+\end{itemize}
+
+\subsubsection{FlyingThings3D}
+Um dataset sintético de grande escala, projetado especificamente para treinar redes neurais profundas. Ele apresenta uma vasta gama de objetos e movimentos.
+\begin{itemize}
+    \item \textbf{Conteúdo:} Objetos do cotidiano (extraídos do dataset ShapeNet) que se movem em trajetórias 3D aleatórias sobre fundos variados.
+    \item \textbf{Ground Truth:} Fornece fluxo óptico denso e mapas de disparidade estéreo.
+    \item \textbf{Características:} Destaca-se pelo seu tamanho massivo e pela grande variedade de movimentos, o que ajuda na generalização dos modelos.
+    \item \textbf{Uso Principal:} Treinamento em larga escala de modelos de aprendizado profundo para fluxo óptico e estéreo.
+\end{itemize}
+
+\subsubsection{FlyingChairs}
+Foi um dos primeiros datasets sintéticos de grande escala criados para o treinamento de redes convolucionais para fluxo óptico (notavelmente, o FlowNet). É conceitualmente mais simples que o FlyingThings3D.
+\begin{itemize}
+    \item \textbf{Conteúdo:} Imagens de modelos 3D de cadeiras renderizadas e sobrepostas a imagens de fundo aleatórias do Flickr. As cadeiras e os fundos são movidos usando transformações afins 2D aleatórias.
+    \item \textbf{Ground Truth:} Fornece fluxo óptico denso e preciso.
+    \item \textbf{Uso Principal:} Pré-treinamento ou treinamento inicial de redes neurais para a tarefa de estimação de fluxo óptico, devido à sua simplicidade e tamanho.
+\end{itemize}
+
+\subsubsection{Middlebury}
+Este é um dataset clássico, composto por cenas de laboratório do mundo real, capturadas em alta resolução e sob condições de iluminação controladas.
+\begin{itemize}
+    \item \textbf{Conteúdo:} Cenas internas com texturas ricas e movimentos geralmente pequenos e bem definidos.
+    \item \textbf{Ground Truth:} Fluxo óptico denso e de altíssima precisão, obtido com técnicas avançadas que não são aplicáveis em cenários gerais.
+    \item \textbf{Características:} Devido ao seu tamanho reduzido, não é adequado para treinamento. Seu foco é a avaliação da \textbf{precisão} dos algoritmos em condições quase ideais.
+    \item \textbf{Uso Principal:} Benchmark de alta precisão para comparar a acurácia de diferentes métodos de fluxo óptico.
+\end{itemize}
+
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}

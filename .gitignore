@@ -2,7 +2,11 @@ Images
 colorBalance.py
 Algorithms/Dataset
 moseg_dataset.zip
-optical_flow_video.mp4
-optical_flow_video2.mp4
 Algorithms/ic
 Algorithms/ptlflow_scripts
+Algorithms/Outputs
+Latex/build
+Latex/main.synctex.gz
+Latex/.latexmkrc
+Latex/Images
+.vscode
