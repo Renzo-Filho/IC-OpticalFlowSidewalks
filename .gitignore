@@ -9,4 +9,11 @@ Latex/build
 Latex/main.synctex.gz
 Latex/.latexmkrc
 Latex/Images
+sideseeing/export-relatorios/templates
+sideseeing/export-relatorios/output
+sideseeing/export-relatorios/output
+sideseeing/export-relatorios/export-linear.py
+sideseeing/export-relatorios/export-test.py
+sideseeing/export-relatorios/jn-test.ipynb
+sideseeing/export-relatorios/out.html
 .vscode

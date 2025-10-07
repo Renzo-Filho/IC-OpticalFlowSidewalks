@@ -1,75 +1,68 @@
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import plotly.express as px
-from jinja2 import Environment, FileSystemLoader
+import os
+import json
+import base64
+from markdown import markdown 
 from datetime import datetime
+from jinja2 import Environment, FileSystemLoader, Template
+from typing import Optional
 
-def gerar_relatorio():
-    """
-    Função principal que executa a análise e gera o relatório HTML.
-    """
-    print("Iniciando a geração do relatório...")
 
-    # --- 1. CARREGAR E ANALISAR DADOS ---
-    df = sns.load_dataset('tips')
+class VisualReport:
 
-    # a. Métricas Principais
-    metricas = {
-        "Valor Total Faturado": f"R$ {df['total_bill'].sum():.2f}",
-        "Gorjeta Média": f"R$ {df['tip'].mean():.2f}",
-        "Dia Mais Movimentado": df['day'].mode()[0]
-    }
+    DEFAULT_TEMPLATE = "templates/template1.html"
 
-    # b. Gráfico Estático
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x='day', y='total_bill', data=df, estimator=sum, ci=None, palette='viridis')
-    plt.title('Faturamento Total por Dia da Semana', fontsize=16)
-    plt.xlabel('Dia da Semana')
-    plt.ylabel('Faturamento Total (R$)')
-    grafico_path = 'grafico_faturamento_dia.png'
-    plt.savefig(grafico_path, dpi=300)
-    plt.close() # Fecha a figura para não exibir no console
-    print(f"Gráfico estático salvo em: {grafico_path}")
+    def __init__(self, default_template_path: str = DEFAULT_TEMPLATE):
+        """
+        Inicializa o VisualReport com template padrão.
+        
+        Args:
+            default_template_path: Caminho para template HTML. Usa o template padrão da classe se não especificado.
+        """
+        self.default_template_path = default_template_path
+        self._default_template = None
+        self._validate_template_exists(default_template_path)
 
-    # c. Gráfico Interativo
-    fig = px.scatter(
-        df, x='total_bill', y='tip', color='smoker', facet_col='sex',
-        size='size', title='Relação entre Valor da Conta e Gorjeta',
-        labels={'total_bill': 'Valor Total da Conta (R$)', 'tip': 'Gorjeta (R$)'}
-    )
-    grafico_interativo_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
-    print("Gráfico interativo gerado.")
+    def _validate_template_exists(self, template_path: str) -> None:
+        """
+        Valida se o template existe no caminho especificado.
+        """
+        if not os.path.exists(template_path):
+            raise FileNotFoundError(
+                f"O Template {template_path} não foi encontrado.\n"
+                f"Certifique-se de que o arquivo está incluído no pacote."
+            )
 
-    # d. Tabela Resumo
-    resumo_por_dia = df.groupby(['day', 'time']).agg(
-        gasto_medio=('total_bill', 'mean'),
-        gorjeta_media=('tip', 'mean')
-    ).reset_index().round(2)
-    tabela_resumo_html = resumo_por_dia.to_html(index=False, classes='table', border=0)
-    print("Tabela resumo gerada.")
+    def _load_default_template(self) -> Template:
+        """
+        Carrega o template padrão (lazy loading).
+        """
+        if self._default_template is None:
+            template_dir = os.path.dirname(self.default_template_path) or '.'
+            template_file_name = os.path.basename(self.default_template_path)
 
-    # --- 2. RENDERIZAR O TEMPLATE JINJA2 ---
-    env = Environment(loader=FileSystemLoader('.'))
-    template = env.get_template('template.html')
+            self.env = Environment(loader=FileSystemLoader(template_dir))
+            self._default_template = self.env.get_template(template_file_name)
+        
+        return self._default_template
 
-    contexto = {
-        "titulo": "Relatório de Análise de Gorjetas",
-        "data_geracao": datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
-        "metricas": metricas,
-        "grafico_faturamento_path": grafico_path,
-        "grafico_interativo_html": grafico_interativo_html,
-        "tabela_resumo_html": tabela_resumo_html
-    }
+    def _load_custom_template(self, template_path: str) -> Template:
+        """
+        Carrega um template personalizado do usuário.
+        """
+        self._validate_template_exists(template_path)
 
-    html_final = template.render(contexto)
-    print("Template renderizado com sucesso.")
+        template_dir = os.path.dirname(template_path) or '.'
+        template_file_name = os.path.basename(template_path)
 
-    # --- 3. SALVAR O RELATÓRIO FINAL ---
-    with open('template-final.html', 'w', encoding='utf-8') as f:
-        f.write(html_final)
+        env = Environment(loader=FileSystemLoader(template_dir))
 
-    print("Relatório 'template-final.html' gerado com sucesso!")
+        return env.get_template(template_file_name)
 
-if __name__ == '__main__':
-    gerar_relatorio()
+    def _extract_title_from_markdown(self, html_content: str) -> Optional[str]:
+        """
+        Extrai título da primeira tag `<h1>` encontrada.
+        """
+        if '<h1>' in html_content:
+            return html_content.split('<h1>')[1].split('</h1>')[0].strip()
+        return None
+
