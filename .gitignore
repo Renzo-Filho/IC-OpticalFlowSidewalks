@@ -12,8 +12,12 @@ Latex/Images
 sideseeing/export-relatorios/templates
 sideseeing/export-relatorios/output
 sideseeing/export-relatorios/output
-sideseeing/export-relatorios/export-linear.py
+sideseeing/export-relatorios/export_linear.py
+sideseeing/export-relatorios/export2.py
 sideseeing/export-relatorios/export-test.py
 sideseeing/export-relatorios/jn-test.ipynb
 sideseeing/export-relatorios/out.html
+sideseeing/export-relatorios/grafico_faturamento_dia.png
 .vscode
+sideseeing/export-relatorios/__pycache__
+
