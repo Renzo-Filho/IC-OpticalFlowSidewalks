@@ -136,7 +136,7 @@ class VisualReport:
                     if component:
                         components.append(component)
                         if component['type'] in ['html', 'image']:
-                            break
+                            continue
 
         return title, components
     
