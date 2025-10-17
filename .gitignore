@@ -18,6 +18,6 @@ sideseeing/export-relatorios/export-test.py
 sideseeing/export-relatorios/jn-test.ipynb
 sideseeing/export-relatorios/out.html
 sideseeing/export-relatorios/grafico_faturamento_dia.png
-.vscode
+sideseeing/export-relatorios/usp_dataloader.ipynb
 sideseeing/export-relatorios/__pycache__
-
+.vscode
