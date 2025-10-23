@@ -11,7 +11,7 @@ from typing import List, Dict, Tuple, Optional
 
 class Report:
 
-    DEFAULT_TEMPLATE = "/home/renzo/Documents/GitHub/temp-SideSeeing-Exporter/templates/t3.html"
+    DEFAULT_TEMPLATE = "/home/renzo/Documents/GitHub/sideseeing-tools/src/sideseeing_tools/templates/template_report.html"
 
     def __init__(self, default_template_path: str = DEFAULT_TEMPLATE):
         """
@@ -82,17 +82,23 @@ class Report:
         
         return summary_data
 
-    def _process_sensors_data(self, ds: sideseeing.SideSeeingDS) -> Optional[List[Dict]]:
+    def _process_sensors_data(self, ds: sideseeing.SideSeeingDS) -> Optional[Dict[str, List[Dict]]]:
         """
-        Prepara os dados dos sensores para serem plotados interativamente com Plotly.js.
+            Prepara os dados dos sensores para visualização com Plotly.js, agrupando por amostra.
+            
+            Retorna um dicionário onde:
+            - Chave: nome da amostra (instance_name)
+            - Valor: lista de dicionários com configurações para gerar gráficos, contendo:
+                * chart_id: ID único para o elemento HTML do gráfico
+                * data_json: dados das séries em formato JSON
+                * layout_json: configurações de layout em formato JSON
+            
+            Returns:
+                Dict[str, List[Dict]] ou None se não houver dados de sensores
         """
         print("Preparando dados dos sensores...")
-        charts_data = []
         
-        # plotter não é mais necessário para criar a imagem, mas pode ser mantido se
-        # for usado em outras partes no futuro.
-        # plotter = plot.SideSeeingPlotter(ds) 
-
+        charts_data_grouped: Dict[str, List[Dict]] = {}
         sensors_axis = {
             'sensors1': ['x'],
             'sensors3': ['x', 'y', 'z'],
@@ -132,22 +138,28 @@ class Report:
                             })
 
                         layout = {
-                            'title': f'<b>Sensor:</b> {sensor_name}<br><b>Amostra:</b> {instance.name}',
+                            'title': f'<b>Sensor:</b> {sensor_name}',
                             'xaxis': {'title': 'Tempo (s)'},
                             'yaxis': {'title': 'Valor'},
-                            'margin': {'l': 50, 'r': 50, 'b': 50, 't': 80}
+                            'margin': {'l': 50, 'r': 50, 'b': 50, 't': 50} 
                         }
-
-                        charts_data.append({
+                        
+                        chart_dict = {
                             'chart_id': chart_id,
                             'data_json': json.dumps(traces),
                             'layout_json': json.dumps(layout)
-                        })
+                        }
 
-        if not charts_data:
+                        # Se a amostra (instance_name) ainda não está no dicionário, crie uma lista vazia
+                        if instance_name not in charts_data_grouped:
+                            charts_data_grouped[instance_name] = []
+                        
+                        charts_data_grouped[instance_name].append(chart_dict)
+
+        if not charts_data_grouped:
             return None
 
-        return charts_data    
+        return charts_data_grouped    
     
     def generate_report(self, dir_path: str, output_path: str, template_path: Optional[str] = None):
         """
@@ -190,8 +202,8 @@ class Report:
         print(f"Relatório salvo com sucesso em: {output_path}")
 
 
+
 dir_path = '/home/renzo/Documents/GitHub/temp-SideSeeing-Exporter/dataset'
-out_path = '/home/renzo/Documents/GitHub/temp-SideSeeing-Exporter/out/2.html'
+out_path = '/home/renzo/Documents/GitHub/temp-SideSeeing-Exporter/out/report.html'
 r = Report()
 r.generate_report(dir_path, out_path)
-

@@ -1,181 +1,179 @@
 import os
-import json
+import io
 import base64
-from markdown import markdown 
+import pandas as pd
+import matplotlib.pyplot as plt
+import sideseeing, plot
 from datetime import datetime
-from bs4 import BeautifulSoup # web scrapping
 from jinja2 import Environment, FileSystemLoader, Template
 from typing import List, Dict, Tuple, Optional
 
-class VisualReport:
+class Report:
 
-    DEFAULT_TEMPLATE = "templates/template1.html"
+    DEFAULT_TEMPLATE = "/home/renzo/Documents/GitHub/temp-SideSeeing-Exporter/templates/t2.html"
 
     def __init__(self, default_template_path: str = DEFAULT_TEMPLATE):
         """
-        Inicializa o VisualReport com template padrão.
-        
-        Args:
-            default_template_path: Caminho para template HTML. Usa o template padrão da classe se não especificado.
+        Inicializa o Report com um template padrão.
         """
         self.default_template_path = default_template_path
-        self._default_template = None
         self._validate_template_exists(default_template_path)
 
     def _validate_template_exists(self, template_path: str) -> None:
         """
-        Valida se o template existe no caminho especificado.
+        Verifica se o template existe.
         """
         if not os.path.exists(template_path):
-            raise FileNotFoundError(
-                f"O Template {template_path} não foi encontrado.\n"
-                f"Certifique-se de que o arquivo está incluído no pacote."
-            )
+            raise FileNotFoundError(f"O Template {template_path} não foi encontrado.")
 
-    def _load_default_template(self) -> Template:
+    def _load_template(self, template_path: Optional[str] = None) -> Template:
         """
-        Carrega o template padrão (lazy loading).
+        Carrega um template padrão ou um personalizado.
         """
-        if self._default_template is None:
-            template_dir = os.path.dirname(self.default_template_path) or '.'
-            template_file_name = os.path.basename(self.default_template_path)
-
-            self.env = Environment(loader=FileSystemLoader(template_dir))
-            self._default_template = self.env.get_template(template_file_name)
+        path = template_path or self.default_template_path
+        self._validate_template_exists(path)
         
-        return self._default_template
-
-    def _load_custom_template(self, template_path: str) -> Template:
-        """
-        Carrega um template personalizado do usuário.
-        """
-        self._validate_template_exists(template_path)
-
-        template_dir = os.path.dirname(template_path) or '.'
-        template_file_name = os.path.basename(template_path)
-
+        template_dir = os.path.dirname(path) or '.'
+        template_file_name = os.path.basename(path)
+        
         env = Environment(loader=FileSystemLoader(template_dir))
-
         return env.get_template(template_file_name)
 
-    def _extract_title_from_markdown(self, html_content: str) -> Optional[str]:
+    def _load_sideseeing_data(self, dir_path: str) -> Tuple[str, sideseeing.SideSeeingDS]:
         """
-        Extrai título da primeira tag `<h1>` encontrada.
+        Carrega o dataset usando o sideseeing-tools.
         """
-        soup = BeautifulSoup(html_content, 'html.parser')
-        h1_tag = soup.find('h1')
+        if not os.path.isdir(dir_path):
+            raise NotADirectoryError(f"O caminho especificado não é um diretório: {dir_path}")
+            
+        ds = sideseeing.SideSeeingDS(root_dir=dir_path)
+        title = f"Relatório de '{os.path.basename(dir_path)}'"
+        return title, ds
 
-        return h1_tag.get_text().strip() if h1_tag else None
-
-    def _process_markdown_cell(self, cell: Dict, first_markdown_h1: bool) -> Tuple[Dict, bool, Optional[str]]:
+    def _create_summary(self, ds: sideseeing.SideSeeingDS) -> Dict:
         """
-        Processa uma célula markdown e retorna um componente e um status do título.
+        Gera um dicionário com dados de resumo do dataset.
         """
-        html_content = markdown("".join(cell['source']))
-        title = None
-        
-        if first_markdown_h1:
-            title = self._extract_title_from_markdown(html_content)
-            if title:
-                first_markdown_h1 = False
-        
-        component = {'type': 'markdown', 'data': html_content}
+        print("Gerando resumo do dataset...")
+        summary_data = {}
+        metadata_df = ds.metadata()
 
-        return component, first_markdown_h1, title
-    
-    def _process_code_output(self, output: Dict) -> Optional[Dict]:
-        """
-        Processa o output de uma célula com código seguindo ordem de prioridade.
-        """
-        output_data = output.get('data', {})
-        
-        # Prioridade: HTML > PNG > Texto
-
-        if 'text/html' in output_data:
-            return {'type': 'html', 'data': "".join(output_data['text/html'])}
-        
-        elif 'image/png' in output_data:
-            return {'type': 'image', 'data': output_data['image/png']}
-        
-        elif 'text/plain' in output_data:
-            return {'type': 'text', 'data': "".join(output_data['text/plain'])}
-        
-        elif 'text' in output:  # Para output do tipo 'stream'
-            return {'type': 'text', 'data': "".join(output['text'])}
-        
-        return None
-    
-    def parse_jupyter_notebook(self, jupyter_notebook_path: str) -> Tuple[str, List[Dict]]:
-        """
-        Lê e transforma um Jupyter notebook, extraindo seu título e seus componentes.
-        """
-        
-        with open(jupyter_notebook_path, 'r', encoding='utf-8') as f:
-            jn = json.load(f)
-
-        # Título padrão será o nome do arquivo sem extensão
-        title = os.path.splitext(os.path.basename(jupyter_notebook_path))[0]
-        components = []
-        first_markdown_h1 = True
-
-        for cell in jn['cells']:
-        # Para cada célula do notebook Jupyter (formato JSON), verificamos se é markdown e processamos o conteúdo.
-            if cell['cell_type'] == 'markdown' and cell['source']:
-                component, first_markdown_h1, new_title = self._process_markdown_cell(cell, first_markdown_h1)
-
-                if new_title:
-                    title = new_title
-
-                components.append(component)
-
-        # Se não é markdown, então iteramos sobre os outputs da célula
-            elif cell['cell_type'] == 'code' and cell.get('outputs'):
-                # Processa cada output, como imagens, textos ou htmls
-                for output in cell['outputs']:
-                    component = self._process_code_output(output)
-                    if component:
-                        components.append(component)
-                        if component['type'] in ['html', 'image']:
-                            continue
-
-        return title, components
-    
-    def generate_report(self, jupyter_notebook_path: str, output_path: str, template_path: Optional[str] = None) -> None:
-        """
-        Gera relatório HTML a partir de um Jupyter notebook.
-        
-        Args:
-            jupyter_notebook_path: Caminho para o notebook .ipynb
-            output_path: Caminho onde salvar o relatório HTML
-            template_path: Caminho para um template específico (opcional)
-        """
-        
-        # Extraímos o conteúdo do JN
-        print(f"Lendo o notebook: {jupyter_notebook_path}")
-        title, components = self.parse_jupyter_notebook(jupyter_notebook_path)
-
-        # Carregamos o template
-        print("Carregando template...")
-        if template_path:
-            template = self._load_custom_template(template_path)
-            print(f"Usando template personalizado: {template_path}")
+        # Extraimos as estatísticas
+        if not metadata_df.empty:
+            summary_data['total_instances'] = ds.size
+            summary_data['total_duration_seconds'] = metadata_df['media_total_time'].sum()
+            summary_data['so_versions'] = metadata_df['so_version'].unique().tolist()
+            summary_data['devices_manufacturer'] = [
+                f"{row['manufacturer']} {row['model']}"  for _, row in metadata_df[['manufacturer', 'model']].drop_duplicates().iterrows()
+            ]
         else:
-            template = self._load_default_template()
-            print(f"Usando template padrão: {self.default_template_path}")
+            summary_data['total_instances'] = 0
+            summary_data['total_duration_seconds'] = 0
+            summary_data['devices+manufacturer'] = []
+            summary_data['so_versions'] = []
 
-        # Variáveis que serão disponibilizadas para o template HTML.
+        # Extraimos os sensores disponiveis
+        sensor_types = []
+        for ax, sensors in ds.sensors.items():
+            if sensors:
+                sensor_types.extend(list(sensors.keys()))
+        summary_data['sensor_types'] = sensor_types
+        
+        return summary_data
+
+    def _process_sensors_data(self, ds: sideseeing.SideSeeingDS) -> Optional[str]:
+        """
+        Processa os dados de sensores usando a função externa plot_sensor para cada instância.
+        """
+        print("Processando dados de sensores...")
+        html_components = []
+        plotter = plot.SideSeeingPlotter(ds)
+        sensors_axis = {
+            'sensors1': ['x'],
+            'sensors3': ['x', 'y', 'z'],
+            'sensors6': ['x', 'y', 'z', 'dx', 'dy', 'dz']
+        }
+        sensors = ds.sensors
+
+        for axis, sensors in sensors.items():
+            if not sensors:
+                continue
+
+            axis_columns = sensors_axis.get(axis)
+            if not axis_columns:
+                continue
+
+            for sensor, instance_set in sensors.items():
+                # Cabeçalho para o tipo de sensor
+                html_components.append(f"<hr><h3>Sensor: {sensor}</h3>")
+                
+                # Iteramos sobre cada instância
+                for instance_name in sorted(list(instance_set)):
+                    instance = ds.instances[instance_name]
+                    sensor_data_dict = getattr(instance, axis, {})
+                    df = sensor_data_dict.get(sensor)
+
+                    if df is not None and not df.empty:
+                        fig, _ = plotter.plot_sensor(data=df, time_column='Time (s)', axis_columns=axis_columns, title=f"Amostra: {instance.name}")
+
+                        # Processa a figura retornada para embutir no HTML
+                        if fig:
+                            buf = io.BytesIO()
+                            fig.savefig(buf, format='png', bbox_inches='tight')
+                            plt.close(fig)
+                            img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+                            html_components.append(f'<img src="data:image/png;base64,{img_base64}" class="img-fluid mb-4"/>')
+
+        if not html_components:
+            return "<p>Nenhum dado de sensor processável foi encontrado no dataset.</p>"
+
+        return "\n".join(html_components)
+    
+    # separar os sensores
+
+    def generate_report(self, dir_path: str, output_path: str, template_path: Optional[str] = None):
+        """
+        Gera um relatório HTML completo a partir de um diretório de dados.
+        """
+        print(f"Lendo o diretório: {dir_path}")
+        title, ds = self._load_sideseeing_data(dir_path)
+
+        summary = self._create_summary(ds)
+
+        # Processa as diferentes seções do relatório
+        sections = {
+            'sensor': self._process_sensors_data(ds)
+            # Futuramente:
+            # 'geo': self._process_geo_data(ds),
+            # 'images': self._process_images_data(ds)
+        }
+        
+        # Filtra seções que não foram processadas
+        processed_sections = {key: value for key, value in sections.items() if value is not None}
+
+        print("Carregando template...")
+        template = self._load_template(template_path)
+
         context = {
             "title": title,
-            "components": components,
+            "sections": processed_sections,
+            "summary": summary, 
             "data_geracao": datetime.now().strftime('%d/%m/%Y %H:%M:%S')
         }
 
         html_output = template.render(context)
 
-        # Garantimos que o diretório de output existe
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        output_dir = os.path.dirname(output_path)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
         
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html_output)
         
         print(f"Relatório salvo com sucesso em: {output_path}")
+
+
+dir_path = '/home/renzo/Documents/GitHub/temp-SideSeeing-Exporter/dataset'
+out_path = '/home/renzo/Documents/GitHub/temp-SideSeeing-Exporter/out/1.html'
+r = Report()
+r.generate_report(dir_path, out_path)
