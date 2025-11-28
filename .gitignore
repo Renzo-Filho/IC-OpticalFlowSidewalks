@@ -4,6 +4,7 @@ moseg_dataset.zip
 Algorithms/ic
 Algorithms/ptlflow_scripts
 Algorithms/Outputs
+Algorithms/__pycache__
 Latex/build
 Latex/main.synctex.gz
 Latex/.latexmkrc
