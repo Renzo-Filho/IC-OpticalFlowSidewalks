@@ -1,4 +1,5 @@
 import cv2
+import os
 
 def convertToFrames(video_path, output_dir):
     """ Transforma um vídeo em seus frames. """
