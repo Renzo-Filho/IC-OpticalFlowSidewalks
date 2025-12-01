@@ -35,8 +35,8 @@ class HornSchunck:
         # --- Parâmetros Horn-Schunck ---
         # Alpha: Regularização de suavidade. 
         # Maior = fluxo mais suave (borrado). Menor = fluxo mais fiel ao gradiente local.
-        self.alpha = 80.0 
-        self.iterations = 30 # Iterações por frame (quanto mais, mais preciso e mais lento)
+        self.alpha = 20.0 
+        self.iterations = 40 # Iterações por frame (quanto mais, mais preciso e mais lento)
         self.epsilon = 0.001 # Critério de parada (opcional)
 
         # Variáveis de estado
@@ -160,7 +160,7 @@ class HornSchunck:
         # --- SEUS PARÂMETROS AJUSTADOS ---
         # Mantivemos sua lógica de Alpha alto, mas adicionamos um 'threshold'
         # para apagar o ruído do asfalto/árvores que sobra.
-        sensitivity = 150.0 
+        sensitivity = 100.0 
         threshold = 5.0  # Pixels com movimento menor que isso ficam pretos
         
         mag_amplified = mag * sensitivity

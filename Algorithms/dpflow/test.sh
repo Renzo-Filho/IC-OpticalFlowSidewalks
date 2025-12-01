@@ -1,1 +1,1 @@
-python infer.py --model dpflow --ckpt_path sintel --input_path my_video.mp4
+python3 infer.py --model dpflow --ckpt_path sintel --input_path Dataset/cars6.mp4
